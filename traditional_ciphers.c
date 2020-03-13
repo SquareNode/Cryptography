@@ -6,6 +6,9 @@
 #include <string.h>
 
 
+#include "ciphers.h"
+
+
 void caesar_cipher_case_sensitive(char *msg, int shift) {
 	
 	char chararr[52];
@@ -15,7 +18,6 @@ void caesar_cipher_case_sensitive(char *msg, int shift) {
 	for( ; i < 52; i++) 
 		chararr[i] = i + 71;
 
-	
 	while(*msg) {
 		if(isupper(*msg)) 
 			printf("%c", chararr[(*msg - 65 + shift)%52]);
@@ -200,11 +202,6 @@ void playfare_cipher_mk_table(char *secret, char table[5][5]) {
 	
 }
 
-typedef struct { 
-		int first;
-		int second;	
-}pair;
-
 pair find(char c, char table[5][5]) {
 
 	int i, j;
@@ -234,8 +231,6 @@ void playfare_cipher(char * msg) {
 		putchar('\n');
 	} 
 	
-	
-	
 	while(*msg) {
 		char first = *msg;
 		char second = *(msg + 1); //what if *(msg + 1) == '\0' ? 
@@ -245,19 +240,21 @@ void playfare_cipher(char * msg) {
 		pair scnd = find(second, table);
 		
 		if(fst.first == scnd.first)
-			printf("%c%c", table[fst.first][(fst.second+1)%5], table[scnd.first][(scnd.second+1)%5]);
+			printf("%c%c", table[fst.first][(fst.second+1)%5], 
+			table[scnd.first][(scnd.second+1)%5]);
 		else if(fst.second == scnd.second) 
-			printf("%c%c", table[(fst.first+1)%5][fst.second], table[(scnd.first+1)%5][scnd.second]);
+			printf("%c%c", table[(fst.first+1)%5][fst.second],
+			table[(scnd.first+1)%5][scnd.second]);
 		else
-			printf("%c%c", table[fst.first][scnd.second], table[scnd.first][fst.second]);
+			printf("%c%c", table[fst.first][scnd.second],
+			table[scnd.first][fst.second]);
 		msg+=2;
 	}
 	
 }
 
 void vigenere_cipher(char *msg) {
-	
-	
+
 	char *secret = "aaa";
 	
 	int i = 0;
@@ -297,13 +294,12 @@ void transposition_cipher(char *msg) {
 			if(table[j][i] != '-')
 				printf("%c", table[j][i]);
 	
-	
 }		
 
 
 int main () {
 	
-	transposition_cipher("Why hello there gentlemen");
+	playfare_cipher("amon");
 	
 	return 0;
 }
