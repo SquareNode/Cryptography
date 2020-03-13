@@ -5,9 +5,7 @@
 #include <math.h>
 #include <string.h>
 
-
 #include "ciphers.h"
-
 
 void caesar_cipher_case_sensitive(char *msg, int shift) {
 	
@@ -218,6 +216,8 @@ pair find(char c, char table[5][5]) {
 }
 
 void playfare_cipher(char * msg) {
+	
+	//works only for lowercase msg of even length
 	
 	char *secret = "secret", table[5][5];
 	int i, j;
