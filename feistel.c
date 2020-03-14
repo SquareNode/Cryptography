@@ -9,9 +9,11 @@ void err(char *msg) {
 
 char* generate_key(int round) {
 	
-	srand(round);
-	int i, num = rand(), key_len = 8;
+	int i, num, key_len = 8;
 	char *res = malloc((key_len + 1) * sizeof(char));
+	
+	srand(round);
+	num = rand();
 	
 	if(res == NULL)
 		err("generate_key: malloc");
@@ -74,12 +76,13 @@ void swap(char *a, char *b) {
 	
 }
 
-void init(char **left, char ** right, char *msg) {
-	
+void init(char **left, char ** right, char **right_copy, char *msg) {
+	//not working...
 	int i, msg_len = strlen(msg), k = 0;
 	
 	*left = malloc((msg_len/2 + 1) * sizeof(char));
 	*right = malloc((msg_len/2 + 1) * sizeof(char));
+	*right_copy = malloc((msg_len/2 + 1) * sizeof(char));
 	
 	if(left == NULL || right == NULL)
 		err("malloc");
@@ -87,23 +90,40 @@ void init(char **left, char ** right, char *msg) {
 	for(i = 0; i < msg_len/2; i++)
 		*left[i] = msg[i];
 	
-	*left[i+1] = '\0';
+	*left[i] = '\0';
 	
 	for( ; i < msg_len; i++)
 		*right[k++] = msg[i];
 		
-	*right[k+1] = '\0';
+	*right[k] = '\0';
+	
+	strcpy(*right_copy, *right);
+	
+	printf("left: %s right: %s right_copy: %s\n", *left, *right, *right_copy);
 	
 }
 
 void xor(char *a, char *b) {
 	
-	int len = strlen(a), i;
+	int len = strlen(a), i, k;
+	char map[62];
+	for(i = 0; i < 10; i++) 
+		map[i] = i + '0';
+	for(k = 0; i < 36; i++, k++)
+		map[i] = 'a' + k;
+	for(k = 0; i < 62; i++, k++)
+		map[i] = 'A' + k;
 	
 	//	[48-57]U[65-90]U[97-122]
 	
 	for(i = 0; i < len; i++) {
 		a[i] ^= b[i];
+		
+		/*
+		hacking it back to digits and alphas
+		
+		1) bunch of stuff
+			
 		if(a[i] < 10)
 			a[i]+='0';
 		else if(a[i] < 36)
@@ -113,19 +133,27 @@ void xor(char *a, char *b) {
 			a[i]= a[i]%26 +'a';
 		else if(a[i] > 122) 
 			a[i]-=5;
+		
+		2) using map 
+		*/
+		
+		if(!isdigit(a[i]) && !isalpha(a[i]))
+			a[i] = map[a[i]%62];
+		
 	}
-	// printf("result: %s, length: %d\n", a, strlen(a));
+	// printf("xor result: %s\n", a);
 		
 }
 
 void feistel_cipher(char *msg) {
 	
 	int rounds = 8;
-	char *left, *right, *key;
+	char *left, *right, *key, *right_copy;
 	int i, msg_len = strlen(msg), k = 0;
 	
 	left = malloc((msg_len/2 + 1) * sizeof(char));
 	right = malloc((msg_len/2 + 1) * sizeof(char));
+	right_copy = malloc((msg_len/2 + 1) * sizeof(char));
 	
 	if(left == NULL || right == NULL)
 		err("feistel_cipher: malloc");
@@ -139,13 +167,15 @@ void feistel_cipher(char *msg) {
 		right[k++] = msg[i];
 		
 	right[k] = '\0';
-	// init(&left,&right,msg);
 	
+	// init(&left,&right,&right_copy,msg);
+
 	for(i = 0; i < rounds; i++) {
 		key = generate_key(i);
-		printf("%d: %s %s %s\n", i, left, right, key);
-		f(key, right);
-		xor(left, right);
+		// printf("%d: %s %s %s\n", i, left, right, key);
+		strcpy(right_copy, right);
+		f(key, right_copy);
+		xor(left, right_copy);
 		swap(left, right);
 	}
 	
@@ -153,12 +183,13 @@ void feistel_cipher(char *msg) {
 	free(key);
 	free(left);
 	free(right);
+	free(right_copy);
 }
 
 
 int main () {
 	
-	feistel_cipher("rXw1rXw1rXw1rXw1");
+	feistel_cipher("Crypthography");
 
 	return 0;
 }
