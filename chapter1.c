@@ -17,6 +17,7 @@ int euclid(int a, int b) {
 	return euclid(b, a%b);
 }
 
+/*
 int extended_euclid(int a, int b, int *x, int *y, Ring r) {
 	//ax + by = gcd(a,b)
 	//I need only a, and positive a
@@ -37,6 +38,7 @@ int extended_euclid(int a, int b, int *x, int *y, Ring r) {
 	
     return gcd;
 }
+*/
 
 
 int find_inverse(int el, int n) {
@@ -104,23 +106,12 @@ int main () {
 	
 	printf("ring %d:\n%d + %d = %d\n%d * %d = %d\n", ring.num, a, b, add(a,b, ring), a,b, mul(a,b, ring));
 	
-	for(i = 0; i < n; i++) {
-		int x, y;
-		if(extended_euclid(ring.memb[i], n, &x, &y, ring) == 1)
-			printf("%d inverse: %d\n", ring.memb[i], x);
-	}
-	
-	/* 
+	printf("Inverses: \n");
+	//inefficient, should use extended euclid 
 	for(i = 0; i < n; i++) 
-		if(euclid(ring.memb[i], n) == 1)
+		if(euclid(i, n) == 1)
 			printf("%d inverse: %d\n", ring.memb[i], find_inverse(ring.memb[i], n));
 	
 	free(ring.memb);
-	 */
-	/*
-	int x,y;
-	int g = extended_euclid(a,b,&x,&y);
-	printf("gcd(%d, %d) = %d, %d*%d + %d*%d = %d\n", a,b, g, a, x, b, y, g);
-	*/
 	return 0;
 }

@@ -103,7 +103,9 @@ void dec(char *ciphertext, char *key) {
 
 int main () {
 	
-	printf("-5%%26 = %d\n", -5%26);
+	
+	
+	// printf("-5%%26 = %d\n", -5%26);
 	
 	/*
 	char msg = 'a';
