@@ -7,7 +7,6 @@
 #define BYTE 8
 // #define DEBUG
 
-
 //custom types
 
 typedef enum {
@@ -28,7 +27,6 @@ void err(char *msg){
 	exit(EXIT_FAILURE);
 }
 
-
 //checking whether numbers are prime or prime ^ x
 
 int is_prime(int n) {
@@ -41,13 +39,50 @@ int is_prime(int n) {
 
 int is_prime_to_x(int n) {
 	
-	int primes_less_than_n[n/2], i, k = 0;
+	int *primes_less_than_n, possible_cand[n], i, j, mult, n_copy, count; 
+	
+	// possible_cand[n] = { [0 ... n] = 1} ? 
+	
+	//using Sieve of Eratosthenes
+	
+	for(i = 0; i < n;i++)
+		possible_cand[i] = 1;
+
+	//0 and 1 aren't candidates
+	possible_cand[0] = 0;
+	possible_cand[1] = 0;
 	
 	for(i = 2; i < n; i++)
-		if(is_prime(i))
-			primes_less_than_n[k++] = i;
-	for(i = 0; i < k; i++){
-		int n_copy = n, count = 0;
+		if(possible_cand[i] && is_prime(i)) {
+			mult = 2, j = mult * i;
+			while(j < n) {
+				possible_cand[j] = 0;
+				mult++;
+				j = mult * i;
+			}
+		}
+	
+	primes_less_than_n = malloc(j * sizeof(int));
+	if(primes_less_than_n == NULL) 
+		err("is_prime_to_x: malloc");
+	
+	j = 0;
+	for(i = 0; i < n; i++)
+		if(possible_cand[i])
+			primes_less_than_n[j++] = i;
+	
+	#ifdef DEBUG
+	printf("\narr possible cand: \n");
+	for(i = 0; i < n; i++)
+		printf("%d ", possible_cand[i]);
+	printf("\nprimes less than \n");
+	for(i = 0; i < j; i++)
+		printf("%d ", primes_less_than_n[i]);
+	putchar('\n');
+	#endif
+	
+	for(i = 0; i < j; i++){
+		n_copy = n, count = 0;
 		while(n_copy != 1 && n_copy%primes_less_than_n[i] == 0) {
 			count++;
 			n_copy/=primes_less_than_n[i];
@@ -113,7 +148,6 @@ void print_pol(unsigned n) {
 				printf("x ^ %d + ", count);
 		mask >>= 1;
 		count--;
-		
 	}
 	putchar('\n');
 	
@@ -127,6 +161,17 @@ int gf_add(galois g, int a, int b) {
 		return (g.el[a] + g.el[b])%g.n;
 	// else
 		// print_pol((g.el[a] + g.el[b])%g.n);
+	
+}
+
+//subtraction
+
+int gf_sub(galois g, int a, int b) {
+	
+	int res = g.el[a] - g.el[b];
+	if(res < 0)
+		res+=g.n;
+	return res;
 	
 }
 	
@@ -144,22 +189,29 @@ int main () {
 			printf("%d ", m.el[i]);	
 	else
 		for(i = 0; i < g; i++)
-			print_pol((unsigned)m.el[i]);
+			print_pol(m.el[i]);
 	
 	printf(m.t == PRIME ? "\nthe field is prime\n" : "\nthe field is extended\n");
 	
 	scanf("%d %d", &el1, &el2);
 	
 	if(el1 > m.n || el2 > m.n) 
-		err("main: out of range");
-	if(m.t == PRIME)
+		err("main: elements not in GF");
+	if(m.t == PRIME) {
 		printf("%d + %d = %d\n", m.el[el1], m.el[el2], gf_add(m,el1,el2));
+		printf("%d - %d = %d\n", m.el[el1], m.el[el2], gf_sub(m,el1,el2));
+	}
 	else {
 		print_pol(m.el[el1]);
 		print_pol(m.el[el2]);
 		print_pol((m.el[el1] + m.el[el2])%m.n);
+		if(m.el[el1] - m.el[el2] > 0)
+			print_pol((m.el[el1] - m.el[el2])%m.n);
+		else
+			print_pol((m.el[el1] - m.el[el2])%m.n+m.n);
 	}
 	
 	free(m.el);
+	
 	return 0;
 }
